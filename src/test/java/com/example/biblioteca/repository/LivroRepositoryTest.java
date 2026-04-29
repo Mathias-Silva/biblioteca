@@ -1,4 +1,4 @@
-package com.example.biblioteca.integration;
+package com.example.biblioteca.repository;
 
 import com.example.biblioteca.dto.LivroRequestDTO;
 import com.example.biblioteca.service.LivroService;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @Testcontainers
-class LivroServiceIT {
+class LivroRepositoryIT {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0");
