@@ -44,8 +44,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           ./mvnw -B -ntp clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
-          -Dsonar.projectKey=minha-org_meu-projeto 
-          -Dsonar.organization=minha-org 
+          -Dsonar.projectKey=Mathias-Silva_biblioteca
+          -Dsonar.organization=mathias-silva
           -Dsonar.host.url=https://sonarcloud.io
 
       - name: Upload JaCoCo report
