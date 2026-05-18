@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/books/v1/volumes",
+    "queryParameters": {
+      "q": { "equalTo": "isbn:9788576082675" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "items": [
+        {
+          "volumeInfo": {
+            "title": "Código Limpo",
+            "authors": ["Robert C. Martin"],
+            "publisher": "Alta Books",
+            "categories": ["Computação"]
+          }
+        }
+      ]
+    }
+  }
+}

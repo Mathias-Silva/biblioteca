@@ -19,12 +19,12 @@ public class UsuarioService implements UserDetailsService {
     private final UsuarioRepository repository;
     private final PasswordEncoder encoder;
 
-    public void cadastrar(Usuario usuario) {
+    // AJUSTE: Mudou de void para Usuario para retornar o objeto com o ID do banco
+    public Usuario cadastrar(Usuario usuario) {
         usuario.setSenha(encoder.encode(usuario.getSenha()));
-        repository.save(usuario);
+        return repository.save(usuario); // Retorna o usuário salvo
     }
 
-    // Método que o Spring Security usa para validar o login
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = repository.findByEmail(email)
