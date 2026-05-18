@@ -26,7 +26,7 @@ public class BibliotecaApplication {
 			Usuario user = new Usuario();
 			user.setNome("Admin");
 			user.setEmail("admin@email.com");
-			user.setSenha(encoder.encode("123"));
+			user.setSenha(encoder.encode("AdminSenha123"));
 
 			repository.save(user);
 			System.out.println("Banco resetado e usuário admin@email.com criado!");
