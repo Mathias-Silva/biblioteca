@@ -28,7 +28,7 @@ public class LivroService {
     /**
      * Busca informações de um livro na Google Books API usando o ISBN.
      */
-    public LivroIsbnLookupDTO buscarPorIsbn(String isbn) {
+    public LivroIsbnLookupDTO buscarInformacoesExternas (String isbn) {
         String isbnLimpo = isbn.replaceAll("[^0-9Xx]", "");
         if (isbnLimpo.isBlank()) {
             return LivroIsbnLookupDTO.naoEncontrado();
