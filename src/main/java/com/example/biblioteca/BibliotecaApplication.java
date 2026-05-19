@@ -27,17 +27,15 @@ public class BibliotecaApplication {
 	@Bean
 	CommandLineRunner init(UsuarioRepository repository, PasswordEncoder encoder) {
 		return args -> {
-			// 1. Limpa tudo para evitar o erro de duplicidade que está dando agora
-			repository.deleteAll();
-
-			// 2. Cria o usuário do zero, com a senha criptografada externa
-			Usuario user = new Usuario();
-			user.setNome("Admin");
-			user.setEmail("admin@email.com");
-			user.setSenha(encoder.encode(adminPassword));
-
-			repository.save(user);
-			logger.info("Banco resetado e usuário admin@email.com criado!");
+			// Em vez de deletar tudo sem critério, verifica se o admin já existe
+			if (!repository.existsByEmail("admin@email.com")) {
+				Usuario user = new Usuario();
+				user.setNome("Admin");
+				user.setEmail("admin@email.com");
+				user.setSenha(encoder.encode("AdminSenha123"));
+				repository.save(user);
+				logger.info("Usuário admin@email.com criado com sucesso!");
+			}
 		};
 	}
 }
