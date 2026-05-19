@@ -76,7 +76,11 @@ O workflow `.github/workflows/ci.yml` executa:
 2. Análise SonarCloud com envio do `jacoco.xml`
 3. Validação do Quality Gate (`sonar.qualitygate.wait=true`)
 
-Configure o secret `SONAR_TOKEN` no repositório GitHub.
+Configure o secret `SONAR_TOKEN` no repositório GitHub (Settings → Secrets → Actions):
+
+1. Gere um token em [SonarCloud → My Account → Security](https://sonarcloud.io/account/security).
+2. O usuário do token precisa ter permissão de **Execute Analysis** no projeto `Mathias-Silva_biblioteca` da organização `mathias-silva`.
+3. O job `sonarcloud` só roda se `SONAR_TOKEN` estiver definido; o job `build-and-test` (testes + JaCoCo 80%) é o gate obrigatório do CI.
 
 ## Estrutura principal
 
