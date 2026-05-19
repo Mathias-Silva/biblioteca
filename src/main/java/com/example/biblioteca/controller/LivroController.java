@@ -43,7 +43,7 @@ public class LivroController {
     @GetMapping("/buscar-isbn")
     @ResponseBody
     public LivroIsbnLookupDTO buscarIsbn(@RequestParam String isbn) {
-        return livroService.buscarPorIsbn(isbn);
+        return livroService.buscarInformacoesExternas (isbn);
     }
 
     @GetMapping("/novo")
