@@ -19,7 +19,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/usuarios/cadastro", "/css/**", "/js/**").permitAll() // Público
+                        .requestMatchers("/usuarios/cadastro", "/usuarios/buscar-cep", "/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated() // Tudo o resto exige login
                 )
                 .formLogin(form -> form

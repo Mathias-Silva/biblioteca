@@ -71,15 +71,22 @@ class LivroServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("deveBuscarInformacoesExternasComSucesso_UsandoWireMock")
-    void deveBuscarInformacoesExternasComSucesso_UsandoWireMock() {
-        assertDoesNotThrow(() -> livroService.buscarInformacoesExternas("9788576082675"));
+    @DisplayName("deveBuscarPorIsbnComSucesso_UsandoWireMock")
+    void deveBuscarPorIsbnComSucesso_UsandoWireMock() {
+        var resultado = livroService.buscarInformacoesExternas("9788576082675");
+
+        assertTrue(resultado.encontrado());
+        assertEquals("Código Limpo", resultado.titulo());
+        assertEquals("Robert C. Martin", resultado.autor());
+        assertEquals("Computação", resultado.genero());
     }
 
     @Test
-    @DisplayName("deveBuscarInformacoesExternasSemResultado")
-    void deveBuscarInformacoesExternasSemResultado() {
-        assertDoesNotThrow(() -> livroService.buscarInformacoesExternas("0000000000000"));
+    @DisplayName("deveBuscarPorIsbnSemResultado")
+    void deveBuscarPorIsbnSemResultado() {
+        var resultado = livroService.buscarInformacoesExternas("0000000000000");
+
+        assertFalse(resultado.encontrado());
     }
 
     @Test

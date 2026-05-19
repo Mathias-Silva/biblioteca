@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class UsuarioControllerE2EIT extends AbstractIntegrationTest {
@@ -50,7 +51,14 @@ class UsuarioControllerE2EIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("nome", "Mathias Teste")
                         .param("email", "mathias.e2e@email.com")
-                        .param("senha", "minhasenha123"))
+                        .param("senha", "minhasenha123")
+                        .param("cep", "01001-000")
+                        .param("logradouro", "Praça da Sé")
+                        .param("numero", "100")
+                        .param("complemento", "Apto 1")
+                        .param("bairro", "Sé")
+                        .param("cidade", "São Paulo")
+                        .param("estado", "SP"))
                 .andExpect(status().is3xxRedirection()) // Deve redirecionar após salvar
                 .andExpect(redirectedUrl("/login?sucesso")); // Redireciona para login com flag de sucesso
 
@@ -58,7 +66,20 @@ class UsuarioControllerE2EIT extends AbstractIntegrationTest {
         Optional<Usuario> usuarioSalvo = usuarioRepository.findByEmail("mathias.e2e@email.com");
         assertTrue(usuarioSalvo.isPresent(), "O usuário deveria ter sido salvo no banco real");
         assertEquals("Mathias Teste", usuarioSalvo.get().getNome());
+        assertEquals("01001-000", usuarioSalvo.get().getCep());
+        assertEquals("Praça da Sé", usuarioSalvo.get().getLogradouro());
+        assertEquals("São Paulo", usuarioSalvo.get().getCidade());
         assertNotEquals("minhasenha123", usuarioSalvo.get().getSenha(),
                 "A senha deve estar criptografada no banco");
+    }
+
+    @Test
+    @DisplayName("Deve buscar CEP via API sem autenticação")
+    void deveBuscarCepViaApi() throws Exception {
+        mockMvc.perform(get("/usuarios/buscar-cep").param("cep", "01001000"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.logradouro").value("Praça da Sé"))
+                .andExpect(jsonPath("$.cidade").value("São Paulo"))
+                .andExpect(jsonPath("$.estado").value("SP"));
     }
 }

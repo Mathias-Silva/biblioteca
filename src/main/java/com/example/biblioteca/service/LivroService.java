@@ -1,8 +1,9 @@
 package com.example.biblioteca.service;
 
+import com.example.biblioteca.dto.GoogleBooksResponseDTO;
+import com.example.biblioteca.dto.LivroIsbnLookupDTO;
 import com.example.biblioteca.dto.LivroRequestDTO;
 import com.example.biblioteca.dto.LivroResponseDTO;
-import com.example.biblioteca.dto.GoogleBooksResponseDTO;
 import com.example.biblioteca.model.Livro;
 import com.example.biblioteca.repository.LivroRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,28 +26,35 @@ public class LivroService {
     private String googleBooksUrl;
 
     /**
-     * Busca informações de um livro em uma API externa (Google Books) usando o ISBN.
-     * Útil para enriquecer os dados do cadastro com informações automáticas.
+     * Busca informações de um livro na Google Books API usando o ISBN.
      */
-    public void buscarInformacoesExternas(String isbn) {
-        String url = googleBooksUrl + "/books/v1/volumes?q=isbn:" + isbn;
+    public LivroIsbnLookupDTO buscarInformacoesExternas (String isbn) {
+        String isbnLimpo = isbn.replaceAll("[^0-9Xx]", "");
+        if (isbnLimpo.isBlank()) {
+            return LivroIsbnLookupDTO.naoEncontrado();
+        }
 
-        // Faz a requisição e mapeia a resposta para um DTO
+        String base = googleBooksUrl.endsWith("/") ? googleBooksUrl.substring(0, googleBooksUrl.length() - 1) : googleBooksUrl;
+        String url = base + "/volumes?q=isbn:" + isbnLimpo;
+
         GoogleBooksResponseDTO resposta = restTemplate.getForObject(url, GoogleBooksResponseDTO.class);
 
-        // Se encontrou dados, exibe no log
-        if (resposta != null && resposta.items() != null && !resposta.items().isEmpty()) {
-            GoogleBooksResponseDTO.VolumeInfo info = resposta.items().get(0).volumeInfo();
-
-            logger.info(() -> String.format(
-                    "Livro encontrado! Título: %s | Autor(es): %s | Editora: %s",
-                    info.title(),
-                    String.join(", ", info.authors()),
-                    info.publisher()
-            ));
-        } else {
-            logger.warning(() -> "Nenhum livro encontrado para o ISBN informado.");
+        if (resposta == null || resposta.items() == null || resposta.items().isEmpty()) {
+            logger.warning(() -> "Nenhum livro encontrado para o ISBN: " + isbnLimpo);
+            return LivroIsbnLookupDTO.naoEncontrado();
         }
+
+        GoogleBooksResponseDTO.VolumeInfo info = resposta.items().getFirst().volumeInfo();
+        String autor = info.authors() != null && !info.authors().isEmpty()
+                ? String.join(", ", info.authors()) : "";
+        String genero = info.categories() != null && !info.categories().isEmpty()
+                ? info.categories().getFirst() : "";
+
+        logger.info(() -> String.format(
+                "Livro encontrado! Título: %s | Autor(es): %s",
+                info.title(), autor));
+
+        return new LivroIsbnLookupDTO(true, info.title(), autor, genero);
     }
 
     // Salva um novo livro associado ao usuário
