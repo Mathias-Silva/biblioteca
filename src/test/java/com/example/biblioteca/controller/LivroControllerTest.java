@@ -15,6 +15,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @DisplayName("LivroController - Testes de integração sem mocks")
@@ -47,6 +48,17 @@ class LivroControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("livros"))
                 .andExpect(model().attributeExists("livros"));
+    }
+
+    @Test
+    @DisplayName("deveBuscarIsbnViaApi")
+    void deveBuscarIsbnViaApi() throws Exception {
+        mockMvc.perform(get("/livros/buscar-isbn")
+                        .param("isbn", "9788576082675")
+                        .with(user(EMAIL_USUARIO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.encontrado").value(true))
+                .andExpect(jsonPath("$.titulo").value("Código Limpo"));
     }
 
     @Test

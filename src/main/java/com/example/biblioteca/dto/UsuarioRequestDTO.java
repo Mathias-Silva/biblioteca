@@ -5,5 +5,12 @@ package com.example.biblioteca.dto;
 public record UsuarioRequestDTO(
         String nome,
         String email,
-        String senha
+        String senha,
+        String cep,
+        String logradouro,
+        String numero,
+        String complemento,
+        String bairro,
+        String cidade,
+        String estado
 ) {}

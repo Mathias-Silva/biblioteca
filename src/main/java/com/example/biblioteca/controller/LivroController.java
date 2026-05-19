@@ -1,5 +1,6 @@
 package com.example.biblioteca.controller;
 
+import com.example.biblioteca.dto.LivroIsbnLookupDTO;
 import com.example.biblioteca.dto.LivroRequestDTO;
 import com.example.biblioteca.dto.LivroResponseDTO;
 import com.example.biblioteca.model.Livro;
@@ -37,6 +38,12 @@ public class LivroController {
         // Adiciona a lista de livros ao modelo para ser exibida na view
         model.addAttribute("livros", livros);
         return "livros"; // Retorna a página "livros.html"
+    }
+
+    @GetMapping("/buscar-isbn")
+    @ResponseBody
+    public LivroIsbnLookupDTO buscarIsbn(@RequestParam String isbn) {
+        return livroService.buscarPorIsbn(isbn);
     }
 
     @GetMapping("/novo")

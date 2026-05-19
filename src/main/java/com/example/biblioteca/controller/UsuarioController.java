@@ -1,18 +1,24 @@
 package com.example.biblioteca.controller;
 
+import com.example.biblioteca.dto.CepLookupDTO;
 import com.example.biblioteca.dto.UsuarioRequestDTO;
 import com.example.biblioteca.model.Usuario;
+import com.example.biblioteca.service.CepService;
 import com.example.biblioteca.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final CepService cepService;
 
     @GetMapping("/login")
     public String login() {
@@ -24,17 +30,30 @@ public class UsuarioController {
         return "cadastro"; // Retorna cadastro.html
     }
 
+    @GetMapping("/usuarios/buscar-cep")
+    @ResponseBody
+    public ResponseEntity<CepLookupDTO> buscarCep(@RequestParam String cep) {
+        return cepService.buscar(cep)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/usuarios/cadastro")
     public String cadastrar(UsuarioRequestDTO dto) {
-        // Converte o DTO seguro em uma Entidade antes de passar para o Service
         Usuario usuario = Usuario.builder()
                 .nome(dto.nome())
                 .email(dto.email())
                 .senha(dto.senha())
-                // Campos sensíveis como roles/permissões ficam protegidos aqui, sem exposição na Web
+                .cep(dto.cep())
+                .logradouro(dto.logradouro())
+                .numero(dto.numero())
+                .complemento(dto.complemento())
+                .bairro(dto.bairro())
+                .cidade(dto.cidade())
+                .estado(dto.estado())
                 .build();
 
         usuarioService.cadastrar(usuario);
-        return "redirect:/login?sucesso"; // Redireciona para o login com aviso
+        return "redirect:/login?sucesso";
     }
 }

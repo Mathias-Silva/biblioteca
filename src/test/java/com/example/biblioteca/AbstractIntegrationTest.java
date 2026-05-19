@@ -15,7 +15,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "app.admin.default-password=AdminSenha123",
-                "api.google-books.url=http://localhost:${wiremock.server.port}"
+                "api.google-books.url=http://localhost:${wiremock.server.port}/books/v1",
+                "api.viacep.url=http://localhost:${wiremock.server.port}/ws"
         }
 )
 @Testcontainers

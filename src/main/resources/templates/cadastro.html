@@ -19,11 +19,14 @@
 <body class="bg-light">
 
 <div class="container mt-5">
-    <div class="card mx-auto" style="max-width: 500px;">
+    <div class="card mx-auto" style="max-width: 560px;">
         <div class="card-body">
             <h2 class="text-center">Criar Conta</h2>
+            <div id="cep-alerta" class="alert d-none" role="alert"></div>
             <form th:action="@{/usuarios/cadastro}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <h5 class="mt-2 mb-3 text-muted">Dados pessoais</h5>
                 <div class="mb-3">
                     <label class="form-label">Nome:</label>
                     <input type="text" name="nome" class="form-control" required>
@@ -36,6 +39,46 @@
                     <label class="form-label">Senha:</label>
                     <input type="password" name="senha" class="form-control" required>
                 </div>
+
+                <h5 class="mt-4 mb-3 text-muted">Endereço</h5>
+                <div class="mb-3">
+                    <label class="form-label">CEP:</label>
+                    <div class="input-group">
+                        <input type="text" name="cep" id="cep" class="form-control" placeholder="00000-000" maxlength="9" required>
+                        <button type="button" id="btn-buscar-cep" class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Logradouro:</label>
+                    <input type="text" name="logradouro" id="logradouro" class="form-control" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label">Número:</label>
+                        <input type="text" name="numero" id="numero" class="form-control" required>
+                    </div>
+                    <div class="col-md-7 mb-3">
+                        <label class="form-label">Complemento:</label>
+                        <input type="text" name="complemento" id="complemento" class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Bairro:</label>
+                    <input type="text" name="bairro" id="bairro" class="form-control" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Cidade:</label>
+                        <input type="text" name="cidade" id="cidade" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">UF:</label>
+                        <input type="text" name="estado" id="estado" class="form-control" maxlength="2" required>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-success w-100">Cadastrar</button>
             </form>
             <div class="text-center mt-3">
@@ -44,5 +87,51 @@
         </div>
     </div>
 </div>
+
+<script>
+    const btnBuscarCep = document.getElementById('btn-buscar-cep');
+    const alertaCep = document.getElementById('cep-alerta');
+
+    function mostrarAlertaCep(mensagem, tipo) {
+        alertaCep.textContent = mensagem;
+        alertaCep.className = 'alert alert-' + tipo;
+        alertaCep.classList.remove('d-none');
+    }
+
+    async function buscarCep() {
+        const cep = document.getElementById('cep').value.trim();
+        if (!cep) {
+            mostrarAlertaCep('Informe o CEP antes de buscar.', 'warning');
+            return;
+        }
+
+        btnBuscarCep.disabled = true;
+        alertaCep.classList.add('d-none');
+
+        try {
+            const resposta = await fetch('/usuarios/buscar-cep?cep=' + encodeURIComponent(cep));
+            if (!resposta.ok) {
+                mostrarAlertaCep('CEP não encontrado.', 'warning');
+                return;
+            }
+
+            const dados = await resposta.json();
+            document.getElementById('cep').value = dados.cep || cep;
+            document.getElementById('logradouro').value = dados.logradouro || '';
+            document.getElementById('complemento').value = dados.complemento || '';
+            document.getElementById('bairro').value = dados.bairro || '';
+            document.getElementById('cidade').value = dados.cidade || '';
+            document.getElementById('estado').value = dados.estado || '';
+            document.getElementById('numero').focus();
+            mostrarAlertaCep('Endereço preenchido. Informe o número.', 'success');
+        } catch (e) {
+            mostrarAlertaCep('Erro ao consultar o CEP. Tente novamente.', 'danger');
+        } finally {
+            btnBuscarCep.disabled = false;
+        }
+    }
+
+    btnBuscarCep.addEventListener('click', buscarCep);
+</script>
 </body>
 </html>

@@ -20,28 +20,75 @@
 <div class="card mx-auto" style="max-width: 600px;">
     <div class="card-body">
         <h2>Novo Livro</h2>
+        <div id="isbn-alerta" class="alert d-none" role="alert"></div>
         <form th:action="@{/livros/salvar}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="mb-3">
+                <label>ISBN:</label>
+                <div class="input-group">
+                    <input type="text" name="isbn" id="isbn" class="form-control" required>
+                    <button type="button" id="btn-buscar-isbn" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+                <small class="text-muted">Digite o ISBN e clique em Buscar para preencher título, autor e gênero.</small>
+            </div>
+            <div class="mb-3">
                 <label>Título:</label>
-                <input type="text" name="titulo" class="form-control" required>
+                <input type="text" name="titulo" id="titulo" class="form-control" required>
             </div>
             <div class="mb-3">
                 <label>Autor:</label>
-                <input type="text" name="autor" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label>ISBN:</label>
-                <input type="text" name="isbn" class="form-control" required>
+                <input type="text" name="autor" id="autor" class="form-control" required>
             </div>
             <div class="mb-3">
                 <label>Gênero:</label>
-                <input type="text" name="genero" class="form-control">
+                <input type="text" name="genero" id="genero" class="form-control">
             </div>
             <button type="submit" class="btn btn-success">Salvar Livro</button>
             <a href="/livros" class="btn btn-link">Cancelar</a>
         </form>
     </div>
 </div>
+
+<script>
+    const btnBuscarIsbn = document.getElementById('btn-buscar-isbn');
+    const alertaIsbn = document.getElementById('isbn-alerta');
+
+    function mostrarAlertaIsbn(mensagem, tipo) {
+        alertaIsbn.textContent = mensagem;
+        alertaIsbn.className = 'alert alert-' + tipo;
+        alertaIsbn.classList.remove('d-none');
+    }
+
+    btnBuscarIsbn.addEventListener('click', async () => {
+        const isbn = document.getElementById('isbn').value.trim();
+        if (!isbn) {
+            mostrarAlertaIsbn('Informe o ISBN antes de buscar.', 'warning');
+            return;
+        }
+
+        btnBuscarIsbn.disabled = true;
+        alertaIsbn.classList.add('d-none');
+
+        try {
+            const resposta = await fetch('/livros/buscar-isbn?isbn=' + encodeURIComponent(isbn));
+            const dados = await resposta.json();
+
+            if (dados.encontrado) {
+                document.getElementById('titulo').value = dados.titulo || '';
+                document.getElementById('autor').value = dados.autor || '';
+                document.getElementById('genero').value = dados.genero || '';
+                mostrarAlertaIsbn('Dados do livro preenchidos com sucesso.', 'success');
+            } else {
+                mostrarAlertaIsbn('Nenhum livro encontrado para este ISBN.', 'warning');
+            }
+        } catch (e) {
+            mostrarAlertaIsbn('Erro ao consultar a API. Tente novamente.', 'danger');
+        } finally {
+            btnBuscarIsbn.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
