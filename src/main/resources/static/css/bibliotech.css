@@ -19,6 +19,7 @@
     --danger-light: #FCA5A5;
     --danger-bg: #FEF2F2;
     --page-bg: #F9FAFB;
+    --ui-bump: 5px;
 }
 
 *,
@@ -30,7 +31,7 @@
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
     color: var(--gray-700);
     background: var(--page-bg);
@@ -50,8 +51,8 @@ a:hover {
 /* Navbar */
 .bt-navbar {
     background: var(--gray-900);
-    height: 52px;
-    padding: 0 24px;
+    height: 57px;
+    padding: 0 calc(24px + var(--ui-bump));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -60,9 +61,9 @@ a:hover {
 .bt-navbar__brand {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: calc(8px + var(--ui-bump));
     color: #ffffff;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     text-decoration: none;
 }
@@ -81,7 +82,7 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--indigo-500);
 }
@@ -91,8 +92,8 @@ a:hover {
     color: #F87171;
     border: 1px solid var(--danger);
     border-radius: 8px;
-    padding: 5px 12px;
-    font-size: 13px;
+    padding: calc(5px + var(--ui-bump)) calc(12px + var(--ui-bump));
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     display: inline-flex;
@@ -110,7 +111,7 @@ a:hover {
 .bt-container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 32px 24px 48px;
+    padding: calc(32px + var(--ui-bump)) calc(24px + var(--ui-bump)) calc(48px + var(--ui-bump));
 }
 
 .bt-page-header {
@@ -124,14 +125,14 @@ a:hover {
 
 .bt-page-title {
     margin: 0;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
     color: var(--gray-900);
 }
 
 .bt-page-subtitle {
     margin: 4px 0 0;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--gray-400);
 }
 
@@ -141,12 +142,12 @@ a:hover {
     color: #ffffff;
     border: none;
     border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 14px;
+    padding: calc(10px + var(--ui-bump)) calc(20px + var(--ui-bump));
+    font-size: 15px;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: calc(7px + var(--ui-bump));
     cursor: pointer;
     text-decoration: none;
     transition: background 0.2s ease, transform 0.15s ease;
@@ -167,8 +168,8 @@ a:hover {
     color: #ffffff;
     border: none;
     border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 14px;
+    padding: calc(10px + var(--ui-bump)) calc(20px + var(--ui-bump));
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s ease, transform 0.15s ease;
@@ -184,12 +185,12 @@ a:hover {
     color: var(--gray-700);
     border: 0.5px solid var(--gray-200);
     border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 13px;
+    padding: calc(7px + var(--ui-bump)) calc(14px + var(--ui-bump));
+    font-size: 14px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: calc(6px + var(--ui-bump));
     text-decoration: none;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
@@ -201,8 +202,8 @@ a:hover {
 }
 
 .bt-icon-btn {
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     border-radius: 7px;
     border: 0.5px solid var(--gray-200);
     display: inline-flex;
@@ -211,7 +212,7 @@ a:hover {
     cursor: pointer;
     background: transparent;
     color: var(--gray-700);
-    font-size: 15px;
+    font-size: 17px;
     padding: 0;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
@@ -254,17 +255,17 @@ a:hover {
 .bt-table thead th {
     background: var(--gray-100);
     color: var(--gray-400);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    padding: 10px 16px;
+    padding: calc(10px + var(--ui-bump)) calc(16px + var(--ui-bump));
     border-bottom: 0.5px solid var(--gray-200);
     text-align: left;
 }
 
 .bt-table tbody td {
-    padding: 14px 16px;
+    padding: calc(14px + var(--ui-bump)) calc(16px + var(--ui-bump));
     color: var(--gray-700);
     border-bottom: 0.5px solid var(--gray-200);
     vertical-align: middle;
@@ -286,7 +287,7 @@ a:hover {
 }
 
 .bt-table__muted {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--gray-400);
 }
 
@@ -296,8 +297,8 @@ a:hover {
     background: var(--indigo-50);
     color: var(--indigo-800);
     border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 12px;
+    padding: calc(3px + var(--ui-bump)) calc(10px + var(--ui-bump));
+    font-size: 13px;
     font-weight: 500;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
@@ -306,7 +307,7 @@ a:hover {
     text-align: center;
     padding: 48px 16px;
     color: var(--gray-400);
-    font-size: 13px;
+    font-size: 14px;
 }
 
 /* Forms */
@@ -322,16 +323,16 @@ a:hover {
     background: #ffffff;
     border-radius: 16px;
     border: 0.5px solid var(--gray-200);
-    padding: 32px 36px;
+    padding: calc(32px + var(--ui-bump)) calc(36px + var(--ui-bump));
     width: 100%;
 }
 
 .bt-card--narrow {
-    max-width: 360px;
+    max-width: 380px;
 }
 
 .bt-card--wide {
-    max-width: 560px;
+    max-width: 580px;
 }
 
 .bt-card--form {
@@ -340,15 +341,15 @@ a:hover {
 }
 
 .bt-card__title {
-    margin: 0 0 20px;
-    font-size: 20px;
+    margin: 0 0 calc(20px + var(--ui-bump));
+    font-size: 22px;
     font-weight: 600;
     color: var(--gray-900);
     text-align: center;
 }
 
 .bt-section-heading {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     color: var(--gray-900);
     margin: 24px 0 12px;
@@ -359,23 +360,23 @@ a:hover {
 }
 
 .bt-field {
-    margin-bottom: 16px;
+    margin-bottom: calc(16px + var(--ui-bump));
 }
 
 .bt-label {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--gray-400);
-    margin-bottom: 5px;
+    margin-bottom: calc(5px + var(--ui-bump));
 }
 
 .bt-input {
     width: 100%;
     border: 0.5px solid var(--gray-200);
     border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 14px;
+    padding: calc(10px + var(--ui-bump)) calc(14px + var(--ui-bump));
+    font-size: 15px;
     color: var(--gray-700);
     background: #ffffff;
     outline: none;
@@ -398,8 +399,8 @@ a:hover {
 
 .bt-hint {
     display: block;
-    margin-top: 6px;
-    font-size: 13px;
+    margin-top: calc(6px + var(--ui-bump));
+    font-size: 14px;
     color: var(--gray-400);
 }
 
@@ -436,12 +437,66 @@ a:hover {
 .bt-alert {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: calc(8px + var(--ui-bump));
     border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-bottom: 16px;
+    padding: calc(10px + var(--ui-bump)) calc(14px + var(--ui-bump));
+    font-size: 14px;
+    margin-bottom: calc(16px + var(--ui-bump));
     border: 0.5px solid transparent;
+}
+
+.bt-alert--timed {
+    flex-direction: column;
+    align-items: stretch;
+    gap: calc(10px + var(--ui-bump));
+    padding-bottom: calc(12px + var(--ui-bump));
+    overflow: hidden;
+}
+
+.bt-alert__content {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(8px + var(--ui-bump));
+}
+
+.bt-alert__content .ti {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.bt-alert__progress {
+    height: 5px;
+    background: rgba(99, 102, 241, 0.18);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bt-alert__progress-bar {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--indigo-600);
+    transform-origin: left center;
+    transform: scaleX(1);
+}
+
+.bt-alert__progress-bar.is-running {
+    animation: bt-alert-countdown 7s linear forwards;
+}
+
+.bt-alert--timed.is-hiding {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+@keyframes bt-alert-countdown {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
 }
 
 .bt-alert--info {
