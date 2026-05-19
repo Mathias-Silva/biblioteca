@@ -100,7 +100,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./mvnw -B -ntp -DskipTests compile \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:5.6.0.6792:sonar \
+          test -f sonar-project.properties
+          ./mvnw -B -ntp -DskipTests compile sonar:sonar \
+            -Dsonar.organization=mathias-silva \
+            -Dsonar.projectKey=Mathias-Silva_biblioteca \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.qualitygate.wait=false
+            -Dsonar.qualitygate.wait=false \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml

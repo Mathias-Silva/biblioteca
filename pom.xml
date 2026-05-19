@@ -165,11 +165,16 @@
 				</configuration>
 			</plugin>
 
-			<!-- SonarCloud (versão fixa; propriedades em sonar-project.properties) -->
+			<!-- SonarCloud (propriedades também em sonar-project.properties) -->
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>5.6.0.6792</version>
+				<configuration>
+					<sonarOrganization>mathias-silva</sonarOrganization>
+					<sonarProjectKey>Mathias-Silva_biblioteca</sonarProjectKey>
+					<sonarHostUrl>https://sonarcloud.io</sonarHostUrl>
+				</configuration>
 			</plugin>
 
 			<!-- JaCoCo plugin -->
