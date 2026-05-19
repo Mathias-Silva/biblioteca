@@ -91,11 +91,13 @@ class UsuarioServiceIntegrationIT extends AbstractIntegrationTest {
                 .senha("Senha123!")
                 .build());
 
-        assertThrows(EmailJaCadastradoException.class, () -> usuarioService.cadastrar(Usuario.builder()
+        Usuario segundo = Usuario.builder()
                 .nome("Dois")
                 .email("TESTE@email.com")
                 .senha("Senha456!")
-                .build()));
+                .build();
+
+        assertThrows(EmailJaCadastradoException.class, () -> usuarioService.cadastrar(segundo));
     }
 
     @Test
