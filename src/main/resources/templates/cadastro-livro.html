@@ -1,55 +1,46 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Cadastrar Livro</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<head th:replace="~{fragments/bibliotech :: head('Cadastrar Livro | BiblioTech')}"></head>
+<body>
 
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
-        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,.08); }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,.04); }
-        .btn-primary { background-color: #2563eb; border: none; padding: 8px 20px; border-radius: 8px; }
-        .btn-primary:hover { background-color: #1d4ed8; }
-        .table thead th { background-color: #f1f5f9; color: #475569; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
-    </style>
-</head>
-<body class="container mt-5">
+<nav th:replace="~{fragments/bibliotech :: navbar}"></nav>
 
-<div class="card mx-auto" style="max-width: 600px;">
-    <div class="card-body">
-        <h2>Novo Livro</h2>
-        <div id="isbn-alerta" class="alert d-none" role="alert"></div>
+<main class="bt-container">
+    <div class="bt-card bt-card--form">
+        <h1 class="bt-card__title">Novo Livro</h1>
+        <div id="isbn-alerta" class="bt-alert d-none" role="alert"></div>
+
         <form th:action="@{/livros/salvar}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <div class="mb-3">
-                <label>ISBN:</label>
-                <div class="input-group">
-                    <input type="text" name="isbn" id="isbn" class="form-control" required>
-                    <button type="button" id="btn-buscar-isbn" class="btn btn-outline-primary">
-                        <i class="bi bi-search"></i> Buscar
+            <div class="bt-field">
+                <label class="bt-label" for="isbn">ISBN</label>
+                <div class="bt-input-group">
+                    <input type="text" name="isbn" id="isbn" class="bt-input" required>
+                    <button type="button" id="btn-buscar-isbn" class="bt-btn-ghost">
+                        <i class="ti ti-search" aria-hidden="true"></i> Buscar
                     </button>
                 </div>
-                <small class="text-muted">Digite o ISBN e clique em Buscar para preencher título, autor e gênero.</small>
+                <span class="bt-hint">Digite o ISBN e clique em Buscar para preencher título, autor e gênero.</span>
             </div>
-            <div class="mb-3">
-                <label>Título:</label>
-                <input type="text" name="titulo" id="titulo" class="form-control" required>
+            <div class="bt-field">
+                <label class="bt-label" for="titulo">Título</label>
+                <input type="text" name="titulo" id="titulo" class="bt-input" required>
             </div>
-            <div class="mb-3">
-                <label>Autor:</label>
-                <input type="text" name="autor" id="autor" class="form-control" required>
+            <div class="bt-field">
+                <label class="bt-label" for="autor">Autor</label>
+                <input type="text" name="autor" id="autor" class="bt-input" required>
             </div>
-            <div class="mb-3">
-                <label>Gênero:</label>
-                <input type="text" name="genero" id="genero" class="form-control">
+            <div class="bt-field">
+                <label class="bt-label" for="genero">Gênero</label>
+                <input type="text" name="genero" id="genero" class="bt-input">
             </div>
-            <button type="submit" class="btn btn-success">Salvar Livro</button>
-            <a href="/livros" class="btn btn-link">Cancelar</a>
+            <div class="bt-form-actions">
+                <button type="submit" class="bt-btn-success">Salvar Livro</button>
+                <a th:href="@{/livros}" class="bt-btn-ghost">Cancelar</a>
+            </div>
         </form>
     </div>
-</div>
+</main>
 
 <script>
     const btnBuscarIsbn = document.getElementById('btn-buscar-isbn');
@@ -57,7 +48,7 @@
 
     function mostrarAlertaIsbn(mensagem, tipo) {
         alertaIsbn.textContent = mensagem;
-        alertaIsbn.className = 'alert alert-' + tipo;
+        alertaIsbn.className = 'bt-alert bt-alert--' + tipo;
         alertaIsbn.classList.remove('d-none');
     }
 
