@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
 import java.util.logging.Logger;
 
@@ -25,6 +26,7 @@ public class BibliotecaApplication {
 	private static final Logger logger = Logger.getLogger(BibliotecaApplication.class.getName());
 
 	@Bean
+	@ConditionalOnBean(UsuarioRepository.class)
 	CommandLineRunner init(UsuarioRepository repository, PasswordEncoder encoder) {
 		return args -> {
 			// Em vez de deletar tudo sem critério, verifica se o admin já existe
