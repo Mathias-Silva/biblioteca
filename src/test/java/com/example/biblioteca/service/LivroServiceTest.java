@@ -73,7 +73,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveBuscarPorIsbnComSucesso_UsandoWireMock")
     void deveBuscarPorIsbnComSucesso_UsandoWireMock() {
-        var resultado = livroService.buscarPorIsbn("9788576082675");
+        var resultado = livroService.buscarInformacoesExternas("9788576082675");
 
         assertTrue(resultado.encontrado());
         assertEquals("Código Limpo", resultado.titulo());
@@ -84,7 +84,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveBuscarPorIsbnSemResultado")
     void deveBuscarPorIsbnSemResultado() {
-        var resultado = livroService.buscarPorIsbn("0000000000000");
+        var resultado = livroService.buscarInformacoesExternas("0000000000000");
 
         assertFalse(resultado.encontrado());
     }
