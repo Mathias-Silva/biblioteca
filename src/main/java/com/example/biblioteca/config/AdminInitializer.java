@@ -21,7 +21,7 @@ public class AdminInitializer implements CommandLineRunner {
     private final UsuarioRepository repository;
     private final PasswordEncoder encoder;
 
-    @Value("${app.admin.default-password}")
+    @Value("${app.admin.default-password:AdminSenha123}")
     private String adminPassword;
 
     @Override
