@@ -87,6 +87,17 @@ class LivroServiceTest extends AbstractIntegrationTest {
         var resultado = livroService.buscarInformacoesExternas("0000000000000");
 
         assertFalse(resultado.encontrado());
+        assertNull(resultado.mensagem());
+    }
+
+    @Test
+    @DisplayName("deveRetornarMensagemQuandoGoogleBooksRetorna429")
+    void deveRetornarMensagemQuandoGoogleBooksRetorna429() {
+        var resultado = livroService.buscarInformacoesExternas("1111111111111");
+
+        assertFalse(resultado.encontrado());
+        assertNotNull(resultado.mensagem());
+        assertTrue(resultado.mensagem().contains("Limite de consultas"));
     }
 
     @Test

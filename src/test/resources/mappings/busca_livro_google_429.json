@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/books/v1/volumes",
+    "queryParameters": {
+      "q": { "equalTo": "isbn:1111111111111" }
+    }
+  },
+  "response": {
+    "status": 429,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "error": {
+        "code": 429,
+        "message": "Quota exceeded"
+      }
+    }
+  }
+}

@@ -73,9 +73,16 @@
 
         try {
             const resposta = await fetch('/livros/buscar-isbn?isbn=' + encodeURIComponent(isbn));
+            if (!resposta.ok) {
+                mostrarAlertaIsbn('Erro no servidor ao buscar o ISBN (código ' + resposta.status + ').', 'danger');
+                return;
+            }
+
             const dados = await resposta.json();
 
-            if (dados.encontrado) {
+            if (dados.mensagem) {
+                mostrarAlertaIsbn(dados.mensagem, 'danger');
+            } else if (dados.encontrado) {
                 document.getElementById('titulo').value = dados.titulo || '';
                 document.getElementById('autor').value = dados.autor || '';
                 document.getElementById('genero').value = dados.genero || '';
