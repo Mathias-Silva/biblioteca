@@ -165,6 +165,13 @@
 				</configuration>
 			</plugin>
 
+			<!-- SonarCloud (versão fixa; propriedades em sonar-project.properties) -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>5.6.0.6792</version>
+			</plugin>
+
 			<!-- JaCoCo plugin -->
 			<plugin>
 				<groupId>org.jacoco</groupId>

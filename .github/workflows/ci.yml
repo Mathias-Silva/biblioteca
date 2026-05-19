@@ -6,7 +6,8 @@ on:
       - '**'
   pull_request:
     branches:
-      - '**'
+      - master
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -60,7 +61,17 @@ jobs:
     name: sonarcloud
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ secrets.SONAR_TOKEN != '' }}
+    # secrets NÃO podem ser usados em expressões if (regra do GitHub Actions).
+    # Executa em push e em PRs do mesmo repositório (forks não recebem SONAR_TOKEN).
+    if: >-
+      ${{
+        needs.build.result == 'success' &&
+        github.actor != 'dependabot[bot]' &&
+        (
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      }}
 
     steps:
       - name: Checkout Code
