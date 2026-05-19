@@ -34,7 +34,7 @@ public class BibliotecaApplication {
 				Usuario user = new Usuario();
 				user.setNome("Admin");
 				user.setEmail("admin@email.com");
-				user.setSenha(encoder.encode("AdminSenha123"));
+				user.setSenha(encoder.encode(adminPassword));
 				repository.save(user);
 				logger.info("Usuário admin@email.com criado com sucesso!");
 			}

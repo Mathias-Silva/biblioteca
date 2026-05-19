@@ -4,6 +4,7 @@ import com.example.biblioteca.dto.LivroRequestDTO;
 import com.example.biblioteca.dto.LivroResponseDTO;
 import com.example.biblioteca.model.Livro;
 import com.example.biblioteca.repository.LivroRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -53,37 +54,43 @@ public class LivroController {
     }
 
     @PostMapping("/excluir/{id}")
-    public String excluir(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails){
-        // Exclui o livro pelo ID
-        livroRepository.deleteById(id);
-        return REDIRECT_LIVROS; // Redireciona para a lista de livros
+    public String excluir(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
+        Livro livro = buscarLivroDoUsuario(id, userDetails.getUsername());
+        livroRepository.deleteById(livro.getId());
+        return REDIRECT_LIVROS;
     }
 
     @GetMapping("/editar/{id}")
-    public String telaEditar(@PathVariable String id, Model model) {
-        // Busca o livro pelo ID, lança exceção se não encontrar
-        Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Livro inválido:" + id));
-
-        // Adiciona o livro ao modelo para preencher o formulário de edição
+    public String telaEditar(@PathVariable String id, Model model,
+                             @AuthenticationPrincipal UserDetails userDetails) {
+        Livro livro = buscarLivroDoUsuario(id, userDetails.getUsername());
         model.addAttribute("livro", livro);
-        return "editar-livro"; // Retorna a página de edição
+        return "editar-livro";
     }
 
     @PostMapping("/editar/{id}")
-    public String atualizar(@PathVariable String id, LivroRequestDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
-        // Cria um objeto Livro atualizado com os dados do formulário
+    public String atualizar(@PathVariable String id, LivroRequestDTO dto,
+                            @AuthenticationPrincipal UserDetails userDetails) {
+        Livro existente = buscarLivroDoUsuario(id, userDetails.getUsername());
         Livro livro = Livro.builder()
                 .id(id)
                 .titulo(dto.titulo())
                 .autor(dto.autor())
                 .isbn(dto.isbn())
                 .genero(dto.genero())
-                .usuarioId(userDetails.getUsername()) // Associa ao usuário logado
+                .usuarioId(existente.getUsuarioId())
                 .build();
 
-        // Salva as alterações no banco de dados
         livroRepository.save(livro);
-        return REDIRECT_LIVROS; // Redireciona para a lista de livros
+        return REDIRECT_LIVROS;
+    }
+
+    private Livro buscarLivroDoUsuario(String id, String emailUsuario) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Livro inválido: " + id));
+        if (!livro.getUsuarioId().equals(emailUsuario)) {
+            throw new AccessDeniedException("Acesso negado ao livro de outro usuário");
+        }
+        return livro;
     }
 }

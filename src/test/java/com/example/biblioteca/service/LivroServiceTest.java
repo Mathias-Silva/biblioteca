@@ -1,97 +1,99 @@
 package com.example.biblioteca.service;
 
+import com.example.biblioteca.AbstractIntegrationTest;
 import com.example.biblioteca.dto.LivroRequestDTO;
 import com.example.biblioteca.dto.LivroResponseDTO;
-import com.example.biblioteca.model.Livro;
 import com.example.biblioteca.repository.LivroRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
-@Testcontainers
-@SpringBootTest(properties = {
-        "api.google-books.url=http://localhost:${wiremock.server.port}",
-        "app.admin.default-password=AdminSenha123"
-})
-@AutoConfigureWireMock(port = 0)
-class LivroServiceTest {
+@DisplayName("LivroService - Testes de integração sem mocks")
+class LivroServiceTest extends AbstractIntegrationTest {
 
-    @Container
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest");
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
+    private static final String EMAIL_USUARIO = "user@email.com";
 
     @Autowired
     private LivroService livroService;
 
-    @MockBean
+    @Autowired
     private LivroRepository livroRepository;
-
-    private Livro livro;
 
     @BeforeEach
     void setUp() {
-        livro = Livro.builder()
-                .id("1")
-                .titulo("Código Limpo")
-                .autor("Robert C. Martin")
-                .isbn("9788576082675")
-                .genero("Computação")
-                .usuarioId("user@email.com")
-                .build();
+        livroRepository.deleteAll();
     }
 
     @Test
+    @DisplayName("deveSalvarLivroComSucesso")
     void deveSalvarLivroComSucesso() {
-        LivroRequestDTO dto = new LivroRequestDTO("Código Limpo", "Robert C. Martin", "9788576082675", "Computação");
-        when(livroRepository.save(any(Livro.class))).thenReturn(livro);
+        LivroRequestDTO dto = new LivroRequestDTO(
+                "Código Limpo", "Robert C. Martin", "9788576082675", "Computação");
 
-        LivroResponseDTO resultado = livroService.salvar(dto, "user@email.com");
+        LivroResponseDTO resultado = livroService.salvar(dto, EMAIL_USUARIO);
 
         assertNotNull(resultado);
         assertEquals("Código Limpo", resultado.titulo());
-        verify(livroRepository, times(1)).save(any(Livro.class));
+        assertTrue(livroRepository.findById(resultado.id()).isPresent());
+        assertEquals(EMAIL_USUARIO, livroRepository.findById(resultado.id()).get().getUsuarioId());
     }
 
     @Test
+    @DisplayName("deveListarPorUsuario")
     void deveListarPorUsuario() {
-        when(livroRepository.findByUsuarioId("user@email.com")).thenReturn(List.of(livro));
+        livroService.salvar(
+                new LivroRequestDTO("Livro A", "Autor A", "isbn-a", "Tech"), EMAIL_USUARIO);
+        livroService.salvar(
+                new LivroRequestDTO("Livro B", "Autor B", "isbn-b", "Romance"), "outro@email.com");
 
-        List<LivroResponseDTO> resultado = livroService.listarPorUsuario("user@email.com");
+        List<LivroResponseDTO> resultado = livroService.listarPorUsuario(EMAIL_USUARIO);
 
-        assertFalse(resultado.isEmpty());
         assertEquals(1, resultado.size());
+        assertEquals("Livro A", resultado.getFirst().titulo());
     }
 
     @Test
+    @DisplayName("deveListarTodosOsLivros")
     void deveListarTodosOsLivros() {
-        when(livroRepository.findAll()).thenReturn(List.of(livro));
+        livroService.salvar(
+                new LivroRequestDTO("Livro 1", "Autor", "isbn1", "Gênero"), EMAIL_USUARIO);
+        livroService.salvar(
+                new LivroRequestDTO("Livro 2", "Autor", "isbn2", "Gênero"), "outro@email.com");
 
         List<LivroResponseDTO> resultado = livroService.listarTodos();
 
-        assertFalse(resultado.isEmpty());
-        assertEquals(1, resultado.size());
+        assertEquals(2, resultado.size());
     }
 
     @Test
+    @DisplayName("deveBuscarInformacoesExternasComSucesso_UsandoWireMock")
     void deveBuscarInformacoesExternasComSucesso_UsandoWireMock() {
         assertDoesNotThrow(() -> livroService.buscarInformacoesExternas("9788576082675"));
+    }
+
+    @Test
+    @DisplayName("deveBuscarInformacoesExternasSemResultado")
+    void deveBuscarInformacoesExternasSemResultado() {
+        assertDoesNotThrow(() -> livroService.buscarInformacoesExternas("0000000000000"));
+    }
+
+    @Test
+    @DisplayName("usuariosNaoDevemVerLivrosUnsDosOutros")
+    void usuariosNaoDevemVerLivrosUnsDosOutros() {
+        livroService.salvar(new LivroRequestDTO("Livro User 1", "Autor", "isbn1", "Gênero"), "user1@email.com");
+        livroService.salvar(new LivroRequestDTO("Livro User 2", "Autor", "isbn2", "Gênero"), "user2@email.com");
+
+        List<LivroResponseDTO> livrosUser1 = livroService.listarPorUsuario("user1@email.com");
+        List<LivroResponseDTO> livrosUser2 = livroService.listarPorUsuario("user2@email.com");
+
+        assertEquals(1, livrosUser1.size());
+        assertEquals(1, livrosUser2.size());
+        assertTrue(livrosUser1.stream().noneMatch(l -> l.titulo().contains("User 2")));
+        assertTrue(livrosUser2.stream().noneMatch(l -> l.titulo().contains("User 1")));
     }
 }

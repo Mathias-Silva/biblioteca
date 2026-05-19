@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -45,7 +46,8 @@ class UsuarioControllerE2EIT extends AbstractIntegrationTest {
 
         // Simula envio de formulário HTML para cadastro de usuário
         mockMvc.perform(post("/usuarios/cadastro")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED) // Tipo de envio do form
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("nome", "Mathias Teste")
                         .param("email", "mathias.e2e@email.com")
                         .param("senha", "minhasenha123"))

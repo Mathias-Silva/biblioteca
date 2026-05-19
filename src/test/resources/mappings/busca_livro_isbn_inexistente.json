@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/books/v1/volumes",
+    "queryParameters": {
+      "q": { "equalTo": "isbn:0000000000000" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "items": []
+    }
+  }
+}

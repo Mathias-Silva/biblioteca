@@ -1,103 +1,153 @@
 package com.example.biblioteca.controller;
 
-import com.example.biblioteca.dto.LivroRequestDTO;
+import com.example.biblioteca.AbstractIntegrationTest;
 import com.example.biblioteca.model.Livro;
 import com.example.biblioteca.repository.LivroRepository;
-import com.example.biblioteca.service.LivroService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@DisplayName("LivroController - Testes de integração sem mocks")
+class LivroControllerTest extends AbstractIntegrationTest {
 
-@WebMvcTest(LivroController.class)
-class LivroControllerTest {
+    private static final String EMAIL_USUARIO = "user@email.com";
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private LivroService livroService;
-
-    @MockBean
+    @Autowired
     private LivroRepository livroRepository;
 
-    @Test
-    @WithMockUser(username = "user@email.com")
-    void deveExibirListaDeLivros() throws Exception {
-        when(livroService.listarPorUsuario("user@email.com")).thenReturn(Collections.emptyList());
+    @BeforeEach
+    void setUp() {
+        livroRepository.deleteAll();
+    }
 
-        mockMvc.perform(get("/livros"))
+    @Test
+    @DisplayName("deveExibirListaDeLivros")
+    void deveExibirListaDeLivros() throws Exception {
+        livroRepository.save(Livro.builder()
+                .titulo("Meu Livro")
+                .autor("Autor")
+                .usuarioId(EMAIL_USUARIO)
+                .build());
+
+        mockMvc.perform(get("/livros")
+                        .with(user(EMAIL_USUARIO)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("livros"))
                 .andExpect(model().attributeExists("livros"));
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("deveExibirTelaDeNovoLivro")
     void deveExibirTelaDeNovoLivro() throws Exception {
-        mockMvc.perform(get("/livros/novo"))
+        mockMvc.perform(get("/livros/novo").with(user(EMAIL_USUARIO)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("cadastro-livro"))
                 .andExpect(model().attributeExists("livro"));
     }
 
     @Test
-    @WithMockUser(username = "user@email.com")
+    @DisplayName("deveSalvarNovoLivroERedirecionar")
     void deveSalvarNovoLivroERedirecionar() throws Exception {
         mockMvc.perform(post("/livros/salvar")
+                        .with(user(EMAIL_USUARIO))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("titulo", "Test-driven Development")
                         .param("autor", "Kent Beck")
                         .param("isbn", "123456789")
                         .param("genero", "Tecnologia")
-                        .with(csrf())) // Necessário por causa do Spring Security
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("deveExcluirLivroERedirecionar")
     void deveExcluirLivroERedirecionar() throws Exception {
-        mockMvc.perform(post("/livros/excluir/1").with(csrf()))
+        Livro livro = livroRepository.save(Livro.builder()
+                .titulo("Excluir")
+                .autor("Autor")
+                .usuarioId(EMAIL_USUARIO)
+                .build());
+
+        mockMvc.perform(post("/livros/excluir/" + livro.getId())
+                        .with(user(EMAIL_USUARIO))
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("deveExibirTelaDeEdicaoSeLivroExistir")
     void deveExibirTelaDeEdicaoSeLivroExistir() throws Exception {
-        Livro livro = Livro.builder().id("1").titulo("Livro Teste").build();
-        when(livroRepository.findById("1")).thenReturn(Optional.of(livro));
+        Livro livro = livroRepository.save(Livro.builder()
+                .titulo("Livro Teste")
+                .autor("Autor")
+                .usuarioId(EMAIL_USUARIO)
+                .build());
 
-        mockMvc.perform(get("/livros/editar/1"))
+        mockMvc.perform(get("/livros/editar/" + livro.getId()).with(user(EMAIL_USUARIO)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("editar-livro"))
                 .andExpect(model().attributeExists("livro"));
     }
 
     @Test
-    @WithMockUser(username = "user@email.com")
+    @DisplayName("deveAtualizarLivroERedirecionar")
     void deveAtualizarLivroERedirecionar() throws Exception {
-        mockMvc.perform(post("/livros/editar/1")
+        Livro livro = livroRepository.save(Livro.builder()
+                .titulo("Original")
+                .autor("Autor")
+                .isbn("123")
+                .genero("Educação")
+                .usuarioId(EMAIL_USUARIO)
+                .build());
+
+        mockMvc.perform(post("/livros/editar/" + livro.getId())
+                        .with(user(EMAIL_USUARIO))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("titulo", "Título Atualizado")
                         .param("autor", "Autor")
                         .param("isbn", "123")
                         .param("genero", "Educação")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/livros"));
+    }
+
+    @Test
+    @DisplayName("deveBloquearPostSemCsrf")
+    void deveBloquearPostSemCsrf() throws Exception {
+        mockMvc.perform(post("/livros/salvar")
+                        .with(user(EMAIL_USUARIO))
+                        .param("titulo", "Livro")
+                        .param("autor", "Autor")
+                        .param("isbn", "isbn")
+                        .param("genero", "Gênero"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("deveAceitarPostComCsrfValido")
+    void deveAceitarPostComCsrfValido() throws Exception {
+        mockMvc.perform(post("/livros/salvar")
+                        .with(user(EMAIL_USUARIO))
+                        .param("titulo", "Livro Seguro")
+                        .param("autor", "Autor")
+                        .param("isbn", "isbn-seguro")
+                        .param("genero", "Gênero")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
