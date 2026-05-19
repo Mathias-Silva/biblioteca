@@ -9,13 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.logging.Logger;
+
 @SpringBootApplication
 public class BibliotecaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BibliotecaApplication.class, args);
 	}
-
+	Logger logger  = Logger.getLogger(getClass().getName());
 	@Bean
 	CommandLineRunner init(UsuarioRepository repository, PasswordEncoder encoder) {
 		return args -> {
@@ -29,7 +31,7 @@ public class BibliotecaApplication {
 			user.setSenha(encoder.encode("AdminSenha123"));
 
 			repository.save(user);
-			System.out.println("Banco resetado e usuário admin@email.com criado!");
+			logger.info("Banco resetado e usuário admin@email.com criado!");
 		};
 	}
 }
