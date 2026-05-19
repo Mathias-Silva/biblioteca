@@ -74,6 +74,44 @@ class UsuarioControllerE2EIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Deve rejeitar cadastro com e-mail já existente")
+    void deveRejeitarCadastroComEmailDuplicado() throws Exception {
+        mockMvc.perform(post("/usuarios/cadastro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("nome", "Usuário Um")
+                        .param("email", "dup@email.com")
+                        .param("senha", "senha123")
+                        .param("cep", "01001-000")
+                        .param("logradouro", "Rua A")
+                        .param("numero", "1")
+                        .param("bairro", "Centro")
+                        .param("cidade", "São Paulo")
+                        .param("estado", "SP"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?sucesso"));
+
+        mockMvc.perform(post("/usuarios/cadastro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("nome", "Usuário Dois")
+                        .param("email", "dup@email.com")
+                        .param("senha", "outrasenha")
+                        .param("cep", "01001-000")
+                        .param("logradouro", "Rua B")
+                        .param("numero", "2")
+                        .param("bairro", "Centro")
+                        .param("cidade", "São Paulo")
+                        .param("estado", "SP"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/usuarios/cadastro?erro=email"));
+
+        assertEquals(1, usuarioRepository.findAll().stream()
+                .filter(u -> "dup@email.com".equals(u.getEmail()))
+                .count());
+    }
+
+    @Test
     @DisplayName("Deve buscar CEP via API sem autenticação")
     void deveBuscarCepViaApi() throws Exception {
         mockMvc.perform(get("/usuarios/buscar-cep").param("cep", "01001000"))

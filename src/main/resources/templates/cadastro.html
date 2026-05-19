@@ -22,6 +22,9 @@
     <div class="card mx-auto" style="max-width: 560px;">
         <div class="card-body">
             <h2 class="text-center">Criar Conta</h2>
+            <div th:if="${param.erro != null and param.erro[0] == 'email'}" class="alert alert-danger" role="alert">
+                Este e-mail já está cadastrado. Use outro e-mail ou faça login.
+            </div>
             <div id="cep-alerta" class="alert d-none" role="alert"></div>
             <form th:action="@{/usuarios/cadastro}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

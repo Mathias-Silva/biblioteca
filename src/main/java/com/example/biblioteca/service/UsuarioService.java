@@ -1,5 +1,6 @@
 package com.example.biblioteca.service;
 
+import com.example.biblioteca.exception.EmailJaCadastradoException;
 import com.example.biblioteca.model.Usuario;
 import com.example.biblioteca.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +22,27 @@ public class UsuarioService implements UserDetailsService {
 
     // AJUSTE: Mudou de void para Usuario para retornar o objeto com o ID do banco
     public Usuario cadastrar(Usuario usuario) {
+        String email = normalizarEmail(usuario.getEmail());
+        if (repository.existsByEmail(email)) {
+            throw new EmailJaCadastradoException(email);
+        }
+        usuario.setEmail(email);
         usuario.setSenha(encoder.encode(usuario.getSenha()));
-        return repository.save(usuario); // Retorna o usuário salvo
+        return repository.save(usuario);
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = repository.findByEmail(email)
+        Usuario usuario = repository.findByEmail(normalizarEmail(email))
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
         return new User(usuario.getEmail(), usuario.getSenha(), new ArrayList<>());
+    }
+
+    private static String normalizarEmail(String email) {
+        if (email == null) {
+            return "";
+        }
+        return email.trim().toLowerCase();
     }
 }

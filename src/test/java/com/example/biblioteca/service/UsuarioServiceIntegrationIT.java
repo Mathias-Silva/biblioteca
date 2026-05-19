@@ -1,6 +1,7 @@
 package com.example.biblioteca.service;
 
 import com.example.biblioteca.AbstractIntegrationTest;
+import com.example.biblioteca.exception.EmailJaCadastradoException;
 import com.example.biblioteca.model.Usuario;
 import com.example.biblioteca.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,42 @@ class UsuarioServiceIntegrationIT extends AbstractIntegrationTest {
         // Validação adicional: verificar se foi persistido
         Optional<Usuario> usuarioNoBanco = usuarioRepository.findByEmail("joao@email.com");
         assertTrue(usuarioNoBanco.isPresent(), "Usuário deve estar no banco");
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar cadastro com e-mail duplicado")
+    void deveRejeitarEmailDuplicado() {
+        Usuario primeiro = Usuario.builder()
+                .nome("Primeiro")
+                .email("duplicado@email.com")
+                .senha("Senha123!")
+                .build();
+        usuarioService.cadastrar(primeiro);
+
+        Usuario segundo = Usuario.builder()
+                .nome("Segundo")
+                .email("duplicado@email.com")
+                .senha("OutraSenha456!")
+                .build();
+
+        assertThrows(EmailJaCadastradoException.class, () -> usuarioService.cadastrar(segundo));
+        assertEquals(1, usuarioRepository.count());
+    }
+
+    @Test
+    @DisplayName("Deve tratar e-mail com maiúsculas como duplicata")
+    void deveRejeitarEmailDuplicadoIgnorandoMaiusculas() {
+        usuarioService.cadastrar(Usuario.builder()
+                .nome("Um")
+                .email("teste@email.com")
+                .senha("Senha123!")
+                .build());
+
+        assertThrows(EmailJaCadastradoException.class, () -> usuarioService.cadastrar(Usuario.builder()
+                .nome("Dois")
+                .email("TESTE@email.com")
+                .senha("Senha456!")
+                .build()));
     }
 
     @Test

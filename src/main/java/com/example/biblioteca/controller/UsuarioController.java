@@ -2,6 +2,7 @@ package com.example.biblioteca.controller;
 
 import com.example.biblioteca.dto.CepLookupDTO;
 import com.example.biblioteca.dto.UsuarioRequestDTO;
+import com.example.biblioteca.exception.EmailJaCadastradoException;
 import com.example.biblioteca.model.Usuario;
 import com.example.biblioteca.service.CepService;
 import com.example.biblioteca.service.UsuarioService;
@@ -27,7 +28,7 @@ public class UsuarioController {
 
     @GetMapping("/usuarios/cadastro")
     public String telaCadastro() {
-        return "cadastro"; // Retorna cadastro.html
+        return "cadastro";
     }
 
     @GetMapping("/usuarios/buscar-cep")
@@ -53,7 +54,11 @@ public class UsuarioController {
                 .estado(dto.estado())
                 .build();
 
-        usuarioService.cadastrar(usuario);
+        try {
+            usuarioService.cadastrar(usuario);
+        } catch (EmailJaCadastradoException e) {
+            return "redirect:/usuarios/cadastro?erro=email";
+        }
         return "redirect:/login?sucesso";
     }
 }
