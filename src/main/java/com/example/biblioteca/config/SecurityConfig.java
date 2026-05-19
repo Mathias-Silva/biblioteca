@@ -16,10 +16,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Desabilita explicitamente o CSRF usando a recomendação moderna do Spring Security
-                .csrf(AbstractHttpConfigurer::disable)
-
-                // CORREÇÃO SONARCLOUD: Desabilita explicitamente o HTTP Basic Authentication para sanar o Security Hotspot
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth

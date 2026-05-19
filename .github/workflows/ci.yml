@@ -6,7 +6,8 @@ on:
       - '**'
   pull_request:
     branches:
-      - '**'
+      - master
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -17,14 +18,15 @@ permissions:
   contents: read
 
 jobs:
-  build-and-analyze:
+  build:
+    name: build-and-test
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # SonarCloud exige histórico completo
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -36,25 +38,17 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x mvnw
 
-      - name: Build and Test
+      - name: Build, Test and JaCoCo (verify)
         run: ./mvnw -B -ntp clean verify
-
-      - name: SonarCloud Analysis
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          ./mvnw -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=Mathias-Silva_biblioteca \
-          -Dsonar.organization=mathias-silva \
-          -Dsonar.host.url=https://sonarcloud.io
 
       - name: Upload JaCoCo report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: target/site/jacoco/index.html
+          path: |
+            target/site/jacoco/index.html
+            target/site/jacoco/jacoco.xml
 
       - name: Upload packaged jar
         if: success()
@@ -62,3 +56,54 @@ jobs:
         with:
           name: app-jar
           path: target/*.jar
+
+  sonar:
+    name: sonarcloud
+    runs-on: ubuntu-latest
+    needs: build
+    # secrets NÃO podem ser usados em expressões if (regra do GitHub Actions).
+    # Executa em push e em PRs do mesmo repositório (forks não recebem SONAR_TOKEN).
+    if: >-
+      ${{
+        needs.build.result == 'success' &&
+        github.actor != 'dependabot[bot]' &&
+        (
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+
+      - name: Download JaCoCo coverage from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
+      - name: SonarCloud Analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          test -f sonar-project.properties
+          ./mvnw -B -ntp -DskipTests compile sonar:sonar \
+            -Dsonar.organization=mathias-silva \
+            -Dsonar.projectKey=Mathias-Silva_biblioteca \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.qualitygate.wait=false \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
