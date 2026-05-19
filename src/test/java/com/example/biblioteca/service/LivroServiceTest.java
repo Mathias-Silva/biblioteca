@@ -10,22 +10,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Testcontainers
 @SpringBootTest(properties = {
-    "api.google-books.url=http://localhost:${wiremock.server.port}",
-    "app.admin.default-password=AdminSenha123"
+        "api.google-books.url=http://localhost:${wiremock.server.port}",
+        "app.admin.default-password=AdminSenha123"
 })
-@AutoConfigureWireMock(port = 0) // Porta dinâmica para evitar conflitos
+@AutoConfigureWireMock(port = 0)
 class LivroServiceTest {
+
+    @Container
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest");
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @Autowired
     private LivroService livroService;
@@ -81,7 +92,6 @@ class LivroServiceTest {
 
     @Test
     void deveBuscarInformacoesExternasComSucesso_UsandoWireMock() {
-        // Executa o método que vai bater no WireMock configurado pelo seu JSON de mapeamento
         assertDoesNotThrow(() -> livroService.buscarInformacoesExternas("9788576082675"));
     }
 }
