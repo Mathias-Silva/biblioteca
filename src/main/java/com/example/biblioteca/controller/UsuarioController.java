@@ -34,6 +34,7 @@ public class UsuarioController {
     @GetMapping("/usuarios/buscar-cep")
     @ResponseBody
     public ResponseEntity<CepLookupDTO> buscarCep(@RequestParam String cep) {
+        // Chama o serviço que faz a requisição ao ViaCEP (WireMock em testes fornece o stub)
         return cepService.buscar(cep)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -41,6 +42,7 @@ public class UsuarioController {
 
     @PostMapping("/usuarios/cadastro")
     public String cadastrar(UsuarioRequestDTO dto) {
+        // Constrói entidade Usuario a partir do DTO recebido do formulário
         Usuario usuario = Usuario.builder()
                 .nome(dto.nome())
                 .email(dto.email())
@@ -55,8 +57,10 @@ public class UsuarioController {
                 .build();
 
         try {
+            // Tenta cadastrar; pode lançar EmailJaCadastradoException
             usuarioService.cadastrar(usuario);
         } catch (EmailJaCadastradoException e) {
+            // Em caso de email duplicado redireciona com flag de erro
             return "redirect:/usuarios/cadastro?erro=email";
         }
         return "redirect:/login?sucesso";
