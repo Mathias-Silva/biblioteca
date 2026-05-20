@@ -4,15 +4,15 @@ Mapeamento dos requisitos funcionais aos testes automatizados (sem mocks de pers
 
 | ID | Requisito | Classe de produção | Classe de teste | Método de teste |
 |----|-----------|-------------------|-----------------|-----------------|
-| REQ-001 | CRUD de livros (controller) | `LivroController` | `LivroControllerTest` | `deveExibirListaDeLivros`, `deveExibirTelaDeNovoLivro`, `deveSalvarNovoLivroERedirecionar`, `deveExcluirLivroERedirecionar`, `deveBuscarIsbnViaApi` |
-| REQ-001 | CRUD de livros (serviço) | `LivroService` | `LivroServiceTest` | `deveSalvarLivroComSucesso`, `deveListarPorUsuario`, `deveListarTodosOsLivros`, `deveBuscarPorIsbnComSucesso_UsandoWireMock`, `deveBuscarPorIsbnSemResultado` |
+| REQ-001 | CRUD de livros (controller) | `LivroController` | `LivroControllerTest` | `deveExibirListaDeLivros`, `deveExibirTelaDeNovoLivro`, `deveSalvarNovoLivroERedirecionar`, `deveExibirTelaDeEdicaoSeLivroExistir`, `deveAtualizarLivroERedirecionar`, `deveExcluirLivroERedirecionar` |
+| REQ-001 | CRUD de livros (serviço) | `LivroService` | `LivroServiceTest` | `deveSalvarLivroComSucesso`, `deveListarPorUsuario`, `deveListarTodosOsLivros`, `usuariosNaoDevemVerLivrosUnsDosOutros` |
 | REQ-002 | Autenticação (login sucesso/falha) | `SecurityConfig`, `UsuarioService` | `LoginSecurityIT` | `deveAutenticarUsuarioComCredenciaisCorretas`, `deveFalharLoginComCredenciaisInvalidas` |
-| REQ-002 | Cadastro de usuário (front + controller) | `UsuarioController` | `UsuarioControllerE2EIT` | `deveCadastrarUsuarioViaFormulario` |
+| REQ-002 | Cadastro de usuário | `UsuarioController` | `UsuarioControllerE2EIT` | `deveCadastrarUsuarioViaFormulario` |
 | REQ-002 | Cadastro e criptografia (serviço) | `UsuarioService` | `UsuarioServiceIntegrationIT` | Testes de `UsuarioServiceIntegrationIT` |
-| REQ-002 | Proteção CSRF (cadastro e livros) | `SecurityConfig` | `LoginSecurityIT`, `LivroControllerTest` | `deveBloquearPostSemCsrf` (Login/usuarios), `deveBloquearPostSemCsrf`, `deveAceitarPostComCsrfValido` (livros) |
-| REQ-002 | Isolamento de dados entre usuários | `LivroController`, `LivroService` | `LoginSecurityIT`, `LivroServiceTest` | `usuarioBNaoPodeEditarLivroDoUsuarioA`, `usuarioBNaoPodeExcluirLivroDoUsuarioA`, `listagemIsolaDadosPorUsuario` |
-| REQ-003 | Integração Google Books (busca por ISBN) | `LivroService` | `LivroServiceTest` | `deveBuscarPorIsbnComSucesso_UsandoWireMock`, `deveBuscarPorIsbnSemResultado` |
-| REQ-004 | Integração ViaCEP / Busca de CEP (preenchimento de endereço no cadastro) | `CepService`, `UsuarioController` | `CepServiceTest` | `deveBuscarCepComSucesso_UsandoWireMock`, `deveRetornarVazioParaCepInvalido` |
+| REQ-002 | Proteção CSRF (cadastro) | `SecurityConfig` | `LoginSecurityIT` | `deveBloquearPostSemCsrf` |
+| REQ-002 | Proteção CSRF (livros) | `SecurityConfig` | `LivroControllerTest` | `deveBloquearPostSemCsrf`, `deveAceitarPostComCsrfValido` |
+| REQ-002 | Isolamento de dados entre usuários | `LivroController` | `LoginSecurityIT` | `usuarioBNaoPodeEditarLivroDoUsuarioA`, `usuarioBNaoPodeExcluirLivroDoUsuarioA`, `listagemIsolaDadosPorUsuario` |
+| REQ-003 | Integração Google Books | `LivroService` | `LivroServiceTest` | `deveBuscarInformacoesExternasComSucesso_UsandoWireMock`, `deveBuscarInformacoesExternasSemResultado` |
 
 ---
 
@@ -107,30 +107,6 @@ sequenceDiagram
 
 ---
 
-## REQ-004: Integração ViaCEP (Busca de CEP)
-
-### Descrição
-Recurso para obter dados de endereço a partir do CEP durante o fluxo de cadastro de usuário. Implementado com `CepService` que consome a API ViaCEP; em testes de integração usamos WireMock (configurado em AbstractIntegrationTest).
-
-### Diagrama de sequência — Busca de CEP (WireMock)
-
-```mermaid
-sequenceDiagram
-    actor U as Browser (cadastro.html)
-    participant C as UsuarioController
-    participant S as CepService
-    participant W as WireMock (mappings/ ViaCEP)
-
-    U->>C: GET /usuarios/buscar-cep?cep=01001-000
-    C->>S: buscar(cep)
-    S->>W: GET /ws/01001000/json
-    W-->>S: 200 JSON (stub)
-    S-->>C: CepLookupDTO
-    C-->>U: 200 JSON (endereço)
-```
-
----
-
 ## Estrutura de testes (após limpeza)
 
 ```
@@ -143,7 +119,6 @@ src/test/java/com/example/biblioteca/
 │   ├── LoginSecurityIT.java
 │   └── UsuarioControllerE2EIT.java
 └── service/
-    ├── CepServiceTest.java
     ├── LivroServiceTest.java
     └── UsuarioServiceIntegrationIT.java
 ```
