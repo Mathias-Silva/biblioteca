@@ -16,7 +16,6 @@ class CepServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveBuscarCepComSucesso_UsandoWireMock")
     void deveBuscarCepComSucesso_UsandoWireMock() {
-        // Teste de integração: WireMock fornece o stub para ViaCEP
         var resultado = cepService.buscar("01001-000");
 
         assertTrue(resultado.isPresent());
@@ -28,7 +27,6 @@ class CepServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveRetornarVazioParaCepInvalido")
     void deveRetornarVazioParaCepInvalido() {
-        // Validação local: CEP inválido não gera chamada HTTP
         assertTrue(cepService.buscar("123").isEmpty());
     }
 }

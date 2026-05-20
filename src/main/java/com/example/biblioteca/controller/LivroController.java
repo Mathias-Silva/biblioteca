@@ -43,8 +43,7 @@ public class LivroController {
     @GetMapping("/buscar-isbn")
     @ResponseBody
     public LivroIsbnLookupDTO buscarIsbn(@RequestParam String isbn) {
-        // Delega a busca externa ao serviço (faz chamada HTTP para Google Books)
-        return livroService.buscarInformacoesExternas(isbn);
+        return livroService.buscarInformacoesExternas (isbn);
     }
 
     @GetMapping("/novo")
@@ -56,16 +55,14 @@ public class LivroController {
 
     @PostMapping("/salvar")
     public String salvar(LivroRequestDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
-        // Salva o livro associado ao usuário logado (ação de escrita no banco)
+        // Salva o livro associado ao usuário logado
         livroService.salvar(dto, userDetails.getUsername());
         return REDIRECT_LIVROS; // Redireciona para a lista de livros
     }
 
     @PostMapping("/excluir/{id}")
     public String excluir(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
-        // Verifica se o livro pertence ao usuário antes de deletar
         Livro livro = buscarLivroDoUsuario(id, userDetails.getUsername());
-        // Deleta o documento do MongoDB via repositório
         livroRepository.deleteById(livro.getId());
         return REDIRECT_LIVROS;
     }
@@ -73,7 +70,6 @@ public class LivroController {
     @GetMapping("/editar/{id}")
     public String telaEditar(@PathVariable String id, Model model,
                              @AuthenticationPrincipal UserDetails userDetails) {
-        // Verifica propriedade do recurso e devolve a view de edição com dados
         Livro livro = buscarLivroDoUsuario(id, userDetails.getUsername());
         model.addAttribute("livro", livro);
         return "editar-livro";
@@ -82,7 +78,6 @@ public class LivroController {
     @PostMapping("/editar/{id}")
     public String atualizar(@PathVariable String id, LivroRequestDTO dto,
                             @AuthenticationPrincipal UserDetails userDetails) {
-        // Atualiza somente se o livro pertence ao usuário autenticado
         Livro existente = buscarLivroDoUsuario(id, userDetails.getUsername());
         Livro livro = Livro.builder()
                 .id(id)
@@ -93,17 +88,14 @@ public class LivroController {
                 .usuarioId(existente.getUsuarioId())
                 .build();
 
-        // Salva alterações no repositório (persistência)
         livroRepository.save(livro);
         return REDIRECT_LIVROS;
     }
 
     private Livro buscarLivroDoUsuario(String id, String emailUsuario) {
-        // Busca por ID (lê do banco) e valida propriedade do recurso
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Livro inválido: " + id));
         if (!livro.getUsuarioId().equals(emailUsuario)) {
-            // Lança exceção de acesso negado se tentar acessar recurso de outro usuário
             throw new AccessDeniedException("Acesso negado ao livro de outro usuário");
         }
         return livro;

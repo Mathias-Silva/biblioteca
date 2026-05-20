@@ -35,26 +35,21 @@ public class LivroService {
      * Busca informações de um livro na Google Books API usando o ISBN.
      */
     public LivroIsbnLookupDTO buscarInformacoesExternas(String isbn) {
-        // Limpa o ISBN (remove caracteres não numéricos)
         String isbnLimpo = isbn.replaceAll("[^0-9Xx]", "");
         if (isbnLimpo.isBlank()) {
             return LivroIsbnLookupDTO.naoEncontrado();
         }
 
-        // Monta a URL de consulta para a Google Books
         String url = montarUrlGoogleBooks(isbnLimpo);
 
         try {
-            // Chamada HTTP GET para a Google Books
             GoogleBooksResponseDTO resposta = restTemplate.getForObject(url, GoogleBooksResponseDTO.class);
 
-            // Trata resposta vazia ou sem itens
             if (resposta == null || resposta.items() == null || resposta.items().isEmpty()) {
                 logger.warning(() -> "Nenhum livro encontrado para o ISBN: " + isbnLimpo);
                 return LivroIsbnLookupDTO.naoEncontrado();
             }
 
-            // Extrai informações relevantes do primeiro item retornado
             GoogleBooksResponseDTO.VolumeInfo info = resposta.items().getFirst().volumeInfo();
             String autor = info.authors() != null && !info.authors().isEmpty()
                     ? String.join(", ", info.authors()) : "";
@@ -67,7 +62,6 @@ public class LivroService {
 
             return LivroIsbnLookupDTO.encontrado(info.title(), autor, genero);
         } catch (HttpStatusCodeException e) {
-            // Trata códigos HTTP específicos (ex.: 429 = too many requests)
             if (e.getStatusCode().value() == 429) {
                 logger.warning("Cota da Google Books excedida ao buscar ISBN: " + isbnLimpo);
                 return LivroIsbnLookupDTO.erroConsulta(
@@ -77,7 +71,6 @@ public class LivroService {
             return LivroIsbnLookupDTO.erroConsulta(
                     "Não foi possível consultar a Google Books no momento. Tente novamente mais tarde.");
         } catch (RestClientException e) {
-            // Trata falhas de rede/cliente HTTP
             logger.warning(() -> "Falha de rede ao consultar Google Books para ISBN " + isbnLimpo + ": " + e.getMessage());
             return LivroIsbnLookupDTO.erroConsulta(
                     "Não foi possível consultar a Google Books. Verifique sua conexão com a internet.");
@@ -85,14 +78,12 @@ public class LivroService {
     }
 
     private String montarUrlGoogleBooks(String isbnLimpo) {
-        // Normaliza base da URL removendo barra final duplicada
         String base = googleBooksUrl.endsWith("/")
                 ? googleBooksUrl.substring(0, googleBooksUrl.length() - 1)
                 : googleBooksUrl;
         StringBuilder url = new StringBuilder(base)
                 .append("/volumes?q=isbn:")
                 .append(isbnLimpo);
-        // Anexa chave de API quando configurada
         if (StringUtils.hasText(googleBooksApiKey)) {
             url.append("&key=").append(googleBooksApiKey.trim());
         }
@@ -101,7 +92,6 @@ public class LivroService {
 
     // Salva um novo livro associado ao usuário
     public LivroResponseDTO salvar(LivroRequestDTO dto, String usuarioId) {
-        // Constrói entidade Livro a partir do DTO
         Livro livro = Livro.builder()
                 .titulo(dto.titulo())
                 .autor(dto.autor())
@@ -110,14 +100,12 @@ public class LivroService {
                 .usuarioId(usuarioId)
                 .build();
 
-        // Persiste no repositório (ação de escrita no MongoDB)
         Livro salvo = livroRepository.save(livro);
         return converterParaDTO(salvo);
     }
 
     // Lista livros de um usuário específico
     public List<LivroResponseDTO> listarPorUsuario(String usuarioId) {
-        // Consulta customizada no repositório por usuarioId
         return livroRepository.findByUsuarioId(usuarioId).stream()
                 .map(this::converterParaDTO)
                 .toList();
@@ -125,7 +113,6 @@ public class LivroService {
 
     // Lista todos os livros cadastrados
     public List<LivroResponseDTO> listarTodos() {
-        // Consulta todos os documentos da coleção 'livros'
         return livroRepository.findAll().stream()
                 .map(this::converterParaDTO)
                 .toList();

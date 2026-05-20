@@ -1,6 +1,8 @@
 package com.example.biblioteca.dto;
 
-public record GoogleBooksResponseDTO(java.util.List<Item> items) {
+import java.util.List;
+
+public record GoogleBooksResponseDTO(List<Item> items) {
     public record Item(VolumeInfo volumeInfo) {}
-    public record VolumeInfo(String title, java.util.List<String> authors, String publisher, java.util.List<String> categories) {}
+    public record VolumeInfo(String title, List<String> authors, String publisher, List<String> categories) {}
 }
