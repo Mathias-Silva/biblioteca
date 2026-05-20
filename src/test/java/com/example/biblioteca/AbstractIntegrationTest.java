@@ -9,7 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Classe base para testes de integração sem mocks.
- * Sobe contexto Spring completo, MongoDB via Testcontainers e Google Books via WireMock.
+ * Sobe contexto Spring completo, MongoDB via Testcontainers e Google Books/ViaCEP via WireMock.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,

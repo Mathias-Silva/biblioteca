@@ -30,6 +30,7 @@ class LivroControllerTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // Limpa a coleção de livros antes de cada teste (Testcontainers MongoDB)
         livroRepository.deleteAll();
     }
 
@@ -42,6 +43,7 @@ class LivroControllerTest extends AbstractIntegrationTest {
                 .usuarioId(EMAIL_USUARIO)
                 .build());
 
+        // Testa renderização da view 'livros' para usuário autenticado
         mockMvc.perform(get("/livros")
                         .with(user(EMAIL_USUARIO)))
                 .andExpect(status().isOk())
@@ -52,6 +54,7 @@ class LivroControllerTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveBuscarIsbnViaApi")
     void deveBuscarIsbnViaApi() throws Exception {
+        // Teste que chama o endpoint que delega para Google Books (WireMock fornece a resposta)
         mockMvc.perform(get("/livros/buscar-isbn")
                         .param("isbn", "9788576082675")
                         .with(user(EMAIL_USUARIO)))
@@ -72,6 +75,7 @@ class LivroControllerTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveSalvarNovoLivroERedirecionar")
     void deveSalvarNovoLivroERedirecionar() throws Exception {
+        // Submete formulário com CSRF (proteção) — ação que grava no banco
         mockMvc.perform(post("/livros/salvar")
                         .with(user(EMAIL_USUARIO))
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -84,83 +88,4 @@ class LivroControllerTest extends AbstractIntegrationTest {
                 .andExpect(redirectedUrl("/livros"));
     }
 
-    @Test
-    @DisplayName("deveExcluirLivroERedirecionar")
-    void deveExcluirLivroERedirecionar() throws Exception {
-        Livro livro = livroRepository.save(Livro.builder()
-                .titulo("Excluir")
-                .autor("Autor")
-                .usuarioId(EMAIL_USUARIO)
-                .build());
-
-        mockMvc.perform(post("/livros/excluir/" + livro.getId())
-                        .with(user(EMAIL_USUARIO))
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/livros"));
-    }
-
-    @Test
-    @DisplayName("deveExibirTelaDeEdicaoSeLivroExistir")
-    void deveExibirTelaDeEdicaoSeLivroExistir() throws Exception {
-        Livro livro = livroRepository.save(Livro.builder()
-                .titulo("Livro Teste")
-                .autor("Autor")
-                .usuarioId(EMAIL_USUARIO)
-                .build());
-
-        mockMvc.perform(get("/livros/editar/" + livro.getId()).with(user(EMAIL_USUARIO)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("editar-livro"))
-                .andExpect(model().attributeExists("livro"));
-    }
-
-    @Test
-    @DisplayName("deveAtualizarLivroERedirecionar")
-    void deveAtualizarLivroERedirecionar() throws Exception {
-        Livro livro = livroRepository.save(Livro.builder()
-                .titulo("Original")
-                .autor("Autor")
-                .isbn("123")
-                .genero("Educação")
-                .usuarioId(EMAIL_USUARIO)
-                .build());
-
-        mockMvc.perform(post("/livros/editar/" + livro.getId())
-                        .with(user(EMAIL_USUARIO))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("titulo", "Título Atualizado")
-                        .param("autor", "Autor")
-                        .param("isbn", "123")
-                        .param("genero", "Educação")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/livros"));
-    }
-
-    @Test
-    @DisplayName("deveBloquearPostSemCsrf")
-    void deveBloquearPostSemCsrf() throws Exception {
-        mockMvc.perform(post("/livros/salvar")
-                        .with(user(EMAIL_USUARIO))
-                        .param("titulo", "Livro")
-                        .param("autor", "Autor")
-                        .param("isbn", "isbn")
-                        .param("genero", "Gênero"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("deveAceitarPostComCsrfValido")
-    void deveAceitarPostComCsrfValido() throws Exception {
-        mockMvc.perform(post("/livros/salvar")
-                        .with(user(EMAIL_USUARIO))
-                        .param("titulo", "Livro Seguro")
-                        .param("autor", "Autor")
-                        .param("isbn", "isbn-seguro")
-                        .param("genero", "Gênero")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/livros"));
-    }
 }

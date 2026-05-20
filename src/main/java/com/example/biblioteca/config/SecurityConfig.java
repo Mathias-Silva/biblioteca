@@ -18,6 +18,7 @@ public class SecurityConfig {
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
 
+                // Configura autorizações: libera acesso a cadastro e recursos estáticos
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/usuarios/cadastro", "/usuarios/buscar-cep", "/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated() // Tudo o resto exige login
@@ -34,6 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Para criptografar as senhas no banco
+        // Bean para criptografar senhas (BCrypt)
+        return new BCryptPasswordEncoder();
     }
 }

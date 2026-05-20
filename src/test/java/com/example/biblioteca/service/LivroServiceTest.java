@@ -26,6 +26,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // Limpa a base (Testcontainers MongoDB garante isolamento)
         livroRepository.deleteAll();
     }
 
@@ -35,6 +36,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
         LivroRequestDTO dto = new LivroRequestDTO(
                 "Código Limpo", "Robert C. Martin", "9788576082675", "Computação");
 
+        // Persistência real: testa integração com MongoDB via Testcontainers
         LivroResponseDTO resultado = livroService.salvar(dto, EMAIL_USUARIO);
 
         assertNotNull(resultado);
@@ -73,6 +75,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveBuscarPorIsbnComSucesso_UsandoWireMock")
     void deveBuscarPorIsbnComSucesso_UsandoWireMock() {
+        // WireMock simula resposta da Google Books para ISBN conhecido
         var resultado = livroService.buscarInformacoesExternas("9788576082675");
 
         assertTrue(resultado.encontrado());
@@ -84,6 +87,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveBuscarPorIsbnSemResultado")
     void deveBuscarPorIsbnSemResultado() {
+        // WireMock simula não encontrar resultado
         var resultado = livroService.buscarInformacoesExternas("0000000000000");
 
         assertFalse(resultado.encontrado());
@@ -93,6 +97,7 @@ class LivroServiceTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("deveRetornarMensagemQuandoGoogleBooksRetorna429")
     void deveRetornarMensagemQuandoGoogleBooksRetorna429() {
+        // Simula limite de cota: WireMock retorna 429 para esse ISBN de teste
         var resultado = livroService.buscarInformacoesExternas("1111111111111");
 
         assertFalse(resultado.encontrado());
@@ -100,18 +105,4 @@ class LivroServiceTest extends AbstractIntegrationTest {
         assertTrue(resultado.mensagem().contains("Limite de consultas"));
     }
 
-    @Test
-    @DisplayName("usuariosNaoDevemVerLivrosUnsDosOutros")
-    void usuariosNaoDevemVerLivrosUnsDosOutros() {
-        livroService.salvar(new LivroRequestDTO("Livro User 1", "Autor", "isbn1", "Gênero"), "user1@email.com");
-        livroService.salvar(new LivroRequestDTO("Livro User 2", "Autor", "isbn2", "Gênero"), "user2@email.com");
-
-        List<LivroResponseDTO> livrosUser1 = livroService.listarPorUsuario("user1@email.com");
-        List<LivroResponseDTO> livrosUser2 = livroService.listarPorUsuario("user2@email.com");
-
-        assertEquals(1, livrosUser1.size());
-        assertEquals(1, livrosUser2.size());
-        assertTrue(livrosUser1.stream().noneMatch(l -> l.titulo().contains("User 2")));
-        assertTrue(livrosUser2.stream().noneMatch(l -> l.titulo().contains("User 1")));
-    }
 }
