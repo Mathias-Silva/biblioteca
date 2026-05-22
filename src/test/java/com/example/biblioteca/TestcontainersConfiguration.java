@@ -15,3 +15,4 @@ public class TestcontainersConfiguration {
         return new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
     }
 }
+//correção
